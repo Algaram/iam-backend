@@ -8,6 +8,7 @@ import java.util.Set;
 //table in the database with an id, username, password, and roles
 
 @Entity
+@Table(name = "app_user")
 public class User {
 
     @Id
