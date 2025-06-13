@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+//tells springboot to make a user 
+//table in the database with an id, username, password, and roles
+
 @Entity
 public class User {
 
@@ -47,4 +50,3 @@ public class User {
     }
 }
 
-// tells springboot to make a user table in the database with an id, username, password, and roles
