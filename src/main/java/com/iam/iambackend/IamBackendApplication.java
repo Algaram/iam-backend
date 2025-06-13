@@ -1,4 +1,4 @@
-package com.iam.iam_backend;
+package com.iam.iambackend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
