@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 // contains all logic for iam policy processing
 
 @Service // allows spring to manage and make available to @Autowired
+// spring boot uses @service as like annotation to call these objects
 public class PolicyService {
 
     private final ObjectMapper objectMapper = new ObjectMapper(); // jackson mapper to convert json to objects
@@ -102,6 +103,6 @@ public class PolicyService {
         
         // if complex then create summary 
         //return to this if we want to pursue better parsing
-        return "Complex Principal: " + principal.toString();
+        return "complex principal: " + principal.toString();
     }
 }

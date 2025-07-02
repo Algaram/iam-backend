@@ -1,31 +1,47 @@
 package com.iam.iambackend.policy;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// REST controller that handles iam policy related http request
-// spring automaticall calls on a PolicyService instance
-
-@RestController // spring handles http request and returns json
-@RequestMapping("/policy") // all endpoints with /policy
+// accepts raw iam policies and wrapped ones
+@RestController
+@RequestMapping("/policy")
 public class PolicyController {
 
     @Autowired
     private PolicyService policyService;
-
-    @PostMapping("/upload") // maaps to POST/policy/upload
-    public ResponseEntity<?> uploadPolicy(@RequestBody PolicyUploadRequest request) {
+    
+    // cnverts iam policy objects back to json
+    @Autowired
+    private ObjectMapper objectMapper;
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadPolicy(@RequestBody IamPolicy policy) {
         try {
-            PolicySummary summary = policyService.parseAndAnalyzePolicy(request.getPolicyJson()); // parsing and analysis
-            return ResponseEntity.ok(summary); // returns as json summary
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body("Error parsing policy: " + e.getMessage()); // catch for any error message
+            String policyJson = objectMapper.writeValueAsString(policy);
+            PolicySummary summary = policyService.parseAndAnalyzePolicy(policyJson);
+            return ResponseEntity.ok(summary);
+        } 
+        catch (Exception e) { // error check return
+            return ResponseEntity.badRequest().body("Error parsing policy: " + e.getMessage());
         }
     }
 
-    @GetMapping("/test") // maps to GET/policy/test to check if controller is working
+    //wrapped format
+    @PostMapping("/upload-wrapped")
+    public ResponseEntity<?> uploadWrappedPolicy(@RequestBody PolicyUploadRequest request) {
+        try {
+            PolicySummary summary = policyService.parseAndAnalyzePolicy(request.getPolicyJson());
+            return ResponseEntity.ok(summary);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error parsing policy: " + e.getMessage());
+        }
+    }
+
+    //test check
+    @GetMapping("/test")
     public String test() {
         return "Policy controller is working!";
     }
