@@ -7,19 +7,6 @@ A full-stack web application that transforms complex AWS IAM policies into intui
 ![Frontend](https://img.shields.io/badge/Frontend-React-blue)
 ![Database](https://img.shields.io/badge/Database-PostgreSQL-blue)
 
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Architecture](#architecture)
-- [Getting Started](#getting-started)
-- [API Documentation](#api-documentation)
-- [Project Structure](#project-structure)
-- [Development Roadmap](#development-roadmap)
-- [Screenshots](#screenshots)
-- [Contributing](#contributing)
-
 ## 🎯 Overview
 
 AWS IAM policies are critical for cloud security but can be incredibly confusing to understand. This application takes those complex JSON files and breaks them down into something actually readable.
@@ -257,19 +244,6 @@ Added the policy upload endpoint and JSON parsing logic. This was the tricky par
 ### Week 3: Making It Look Good
 Built the React frontend with an AWS Console-inspired design. Added file upload functionality, connected everything to the backend, and made it responsive. Also spent way too much time getting the layout centered properly.
 
-## 📸 Screenshots
-
-### Upload Interface
-![Upload Interface](screenshots/upload-interface.png)
-*AWS Console-styled upload interface with drag & drop functionality*
-
-### Policy Analysis Results
-![Policy Results](screenshots/policy-results.png)
-*Comprehensive policy breakdown with summary cards and detailed statement analysis*
-
-### Sample Policy Visualization
-![Policy Visualization](screenshots/policy-visualization.png)
-*Coming in Week 4: Interactive D3.js visualizations*
 
 ## 🔧 Configuration
 
