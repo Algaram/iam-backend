@@ -31,7 +31,6 @@ The idea is simple: upload an IAM policy, and get back a clear breakdown of who 
 - 🔧 **Policy Upload**: Drag & drop or file picker for JSON policy files
 - 📊 **Policy Analysis**: Parse and analyze complex IAM policy structures
 - 🎨 **AWS Console UI**: Professional interface matching AWS design language
-- 📱 **Responsive Design**: Works on desktop, tablet, and mobile devices
 - ⚡ **Real-time Processing**: Instant policy analysis and feedback
 - 🔍 **Detailed Breakdown**: View actions, resources, principals, and conditions
 - 🧪 **Sample Policies**: Built-in examples for testing and learning

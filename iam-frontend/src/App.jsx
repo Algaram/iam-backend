@@ -80,7 +80,7 @@ function App() {
 
       {/* Footer */}
       <footer className="app-footer">
-        <p>Week 3: Frontend Setup - Connecting to Spring Boot Backend</p>
+        <p>Made by Alex Ramirez :P</p>
       </footer>
     </div>
   );
