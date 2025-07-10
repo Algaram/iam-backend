@@ -15,16 +15,17 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         
-        // Allow requests from your React app
+        //allows server and local dev
+        config.addAllowedOrigin("http://18.222.166.31:3000");
         config.addAllowedOrigin("http://localhost:5173");
         
-        // Allow all HTTP methods
+        //allow all http methods
         config.addAllowedMethod("*");
         
-        // Allow all headers
+        //allows all headers
         config.addAllowedHeader("*");
         
-        // Allow credentials if needed
+        //allows if creds needed
         config.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

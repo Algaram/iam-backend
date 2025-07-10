@@ -1,0 +1,266 @@
+.policy-tree-diagram {
+  background: white;
+  border: 1px solid #d5dbdb;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chart-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.chart-header h4 {
+  color: #232f3e;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.chart-header p {
+  color: #545b64;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.chart-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* D3.js Tree Styles */
+.node {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.node circle {
+  transition: all 0.3s ease;
+}
+
+.node:hover circle {
+  filter: brightness(1.2);
+  stroke-width: 3px !important;
+}
+
+.node text {
+  font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+  fill: #232f3e;
+  transition: all 0.2s ease;
+}
+
+.node:hover text {
+  font-weight: 600;
+}
+
+.link {
+  transition: all 0.3s ease;
+}
+
+.link:hover {
+  stroke: #ff9900 !important;
+  stroke-width: 3px !important;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d5dbdb;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #545b64;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
+.chart-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #879196;
+  font-style: italic;
+  text-align: center;
+}
+
+.node[data-type="root"] circle {
+  stroke-width: 3px;
+}
+
+.node[data-type="statement"] circle {
+  stroke-width: 2px;
+}
+
+.node[data-type="action"] circle,
+.node[data-type="resource"] circle {
+  stroke-width: 1px;
+}
+
+.node:hover {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.tree-enter {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.6s ease;
+}
+
+.tree-enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.zoom-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.zoom-btn {
+  background: white;
+  border: 1px solid #d5dbdb;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: #232f3e;
+  transition: all 0.2s ease;
+}
+
+.zoom-btn:hover {
+  background: #f8f9fa;
+  border-color: #879196;
+}
+
+@media (max-width: 768px) {
+  .policy-tree-diagram {
+    padding: 1rem;
+  }
+  
+  .chart-header h4 {
+    font-size: 1.1rem;
+  }
+  
+  .chart-header p {
+    font-size: 0.8rem;
+  }
+  
+  .chart-container {
+    min-height: 400px;
+  }
+  
+  .chart-legend {
+    gap: 0.5rem;
+  }
+  
+  .legend-item {
+    font-size: 0.8rem;
+  }
+  
+  .node text {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    min-height: 350px;
+  }
+  
+  .chart-legend {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.chart-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.chart-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.chart-container::-webkit-scrollbar-thumb {
+  background: #d5dbdb;
+  border-radius: 4px;
+}
+
+.chart-container::-webkit-scrollbar-thumb:hover {
+  background: #879196;
+}
+
+.tree-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  color: #545b64;
+}
+
+.loading-tree {
+  text-align: center;
+}
+
+.loading-tree .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #ff9900;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.node {
+  outline: none;
+}
+
+.node:focus circle {
+  stroke: #ff9900;
+  stroke-width: 3px;
+}
+
+@media (prefers-contrast: high) {
+  .node circle {
+    stroke-width: 2px;
+  }
+  
+  .link {
+    stroke-width: 2px;
+  }
+}

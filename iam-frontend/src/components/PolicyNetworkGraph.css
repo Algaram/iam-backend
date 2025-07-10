@@ -1,0 +1,323 @@
+.policy-network-graph {
+  background: white;
+  border: 1px solid #d5dbdb;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chart-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.chart-header h4 {
+  color: #232f3e;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.chart-header p {
+  color: #545b64;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.filter-controls label {
+  font-size: 0.9rem;
+  color: #232f3e;
+  font-weight: 500;
+}
+
+.filter-select {
+  padding: 4px 8px;
+  border: 1px solid #d5dbdb;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #232f3e;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #ff9900;
+  box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.2);
+}
+
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  background: #fafbfc;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-container svg {
+  max-width: 100%;
+  height: auto;
+  cursor: grab;
+}
+
+.chart-container svg:active {
+  cursor: grabbing;
+}
+
+.nodes .node {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nodes .node circle {
+  transition: all 0.3s ease;
+}
+
+.nodes .node:hover circle {
+  filter: brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.nodes .node text {
+  font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+  font-weight: 500;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.nodes .node:hover text {
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.links .link {
+  transition: all 0.3s ease;
+  stroke-linecap: round;
+}
+
+.links .link:hover {
+  stroke: #ff9900 !important;
+  stroke-width: 3px !important;
+}
+
+.node[data-type="statement"] circle {
+  stroke-width: 2px;
+}
+
+.node[data-type="action"] circle {
+  stroke-width: 1.5px;
+}
+
+.node[data-type="resource"] circle {
+  stroke-width: 1.5px;
+}
+
+.node[data-type="principal"] circle {
+  stroke-width: 1.5px;
+}
+
+
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d5dbdb;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #545b64;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
+.chart-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #879196;
+  font-style: italic;
+  text-align: center;
+}
+
+.network-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  color: #545b64;
+}
+
+.loading-network {
+  text-align: center;
+}
+
+.loading-network .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #ff9900;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.zoom-info {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #545b64;
+  border: 1px solid #d5dbdb;
+}
+
+.network-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.network-enter {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.6s ease;
+}
+
+.network-enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.simulation-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+}
+
+.simulation-btn {
+  background: white;
+  border: 1px solid #d5dbdb;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.simulation-btn:hover {
+  background: #f8f9fa;
+  border-color: #879196;
+}
+
+.simulation-btn.active {
+  background: #ff9900;
+  color: white;
+  border-color: #ff9900;
+}
+
+@media (max-width: 768px) {
+  .policy-network-graph {
+    padding: 1rem;
+  }
+  
+  .chart-header h4 {
+    font-size: 1.1rem;
+  }
+  
+  .chart-header p {
+    font-size: 0.8rem;
+  }
+  
+  .filter-controls {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .chart-container {
+    min-height: 350px;
+  }
+  
+  .chart-legend {
+    gap: 0.5rem;
+  }
+  
+  .legend-item {
+    font-size: 0.8rem;
+  }
+  
+  .nodes .node circle {
+    r: 1.2;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    min-height: 300px;
+  }
+  
+  .chart-legend {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .filter-controls {
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .nodes .node circle {
+    stroke-width: 2px;
+  }
+  
+  .links .link {
+    stroke-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nodes .node,
+  .links .link,
+  .nodes .node circle,
+  .nodes .node text {
+    transition: none;
+  }
+}

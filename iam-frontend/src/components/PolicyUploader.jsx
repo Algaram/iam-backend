@@ -13,12 +13,14 @@ Handles:
 function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error }) {
   // drag drop functionality
   const [isDragOver, setIsDragOver] = useState(false);
-  
+
   //hidden file input
   const fileInputRef = useRef(null);
 
-  //uses internal backend
-  const BACKEND_URL = 'http://localhost:8080';
+  //backend origin
+  const BACKEND_URL = process.env.NODE_ENV === 'production' 
+    ? 'http://18.222.166.31:8080'
+    : 'http://localhost:8080';
 
   // file selection from drag and drop
   const handleFileSelect = async (file) => {
@@ -39,10 +41,10 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
     try {
       //loading state
       onLoadingChange(true);
-      
+
       //reads file
       const fileContent = await readFileAsText(file);
-      
+
       //parse then validate JSON fikle
       let policyJson;
       try {
@@ -81,7 +83,7 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
   const uploadPolicyToBackend = async (policyJson) => {
     try {
       console.log('Sending policy to backend:', policyJson);
-      
+
       const response = await axios.post(`${BACKEND_URL}/policy/upload`, policyJson, {
         headers: {
           'Content-Type': 'application/json',
@@ -90,13 +92,13 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
       });
 
       console.log('Backend response:', response.data);
-      
+
       // if success pass data to parent component
       onSuccess(response.data);
 
     } catch (error) {
       console.error('Backend error:', error);
-      
+
       if (error.code === 'ECONNREFUSED') {
         onError('Cannot connect to backend. Make sure Spring Boot is running on port 8080.');
       } else if (error.response) {
@@ -112,30 +114,30 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
     }
   };
 
-  
+
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  
+
   const handleDragLeave = (e) => {
     e.preventDefault();
     setIsDragOver(false);
   };
 
-  
+
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileSelect(files[0]);
     }
   };
 
-  
+
   const handleFileInputChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
@@ -143,7 +145,7 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
     }
   };
 
-  
+
   const openFilePicker = () => {
     fileInputRef.current?.click();
   };
@@ -185,7 +187,7 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
   return (
     <div className="policy-uploader">
       {/* Upload Area */}
-      <div 
+      <div
         className={`upload-area ${isDragOver ? 'drag-over' : ''} ${isLoading ? 'loading' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -195,7 +197,22 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
         {isLoading ? (
           <div className="loading-content">
             <div className="spinner"></div>
-            <p>Processing policy...</p>
+            <p>Analyzing your policy...</p>
+
+            <div className="loading-steps">
+              <div className="loading-step active">
+                <div className="loading-step-icon"></div>
+                <span>Processing JSON structure...</span>
+              </div>
+              <div className="loading-step">
+                <div className="loading-step-icon"></div>
+                <span>Extracting permissions...</span>
+              </div>
+              <div className="loading-step">
+                <div className="loading-step-icon"></div>
+                <span>Generating visualizations...</span>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="upload-content">
@@ -218,15 +235,15 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
 
       {/* Action buttons */}
       <div className="upload-actions">
-        <button 
-          onClick={openFilePicker} 
+        <button
+          onClick={openFilePicker}
           disabled={isLoading}
           className="btn btn-primary"
         >
           Choose File
         </button>
-        <button 
-          onClick={loadSamplePolicy} 
+        <button
+          onClick={loadSamplePolicy}
           disabled={isLoading}
           className="btn btn-secondary"
         >
@@ -244,9 +261,9 @@ function PolicyUploader({ onSuccess, onError, onLoadingChange, isLoading, error 
       {/* Help text */}
       <div className="help-text">
         <h4>Need a test policy?</h4>
-        <p>Click "Load Sample Policy" or upload your own IAM policy JSON file. 
-           The policy will be analyzed and you'll see a breakdown of permissions, 
-           actions, and resources.</p>
+        <p>Click "Load Sample Policy" or upload your own IAM policy JSON file.
+          The policy will be analyzed and you'll see a breakdown of permissions,
+          actions, and resources.</p>
       </div>
     </div>
   );

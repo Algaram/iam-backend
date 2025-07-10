@@ -2,7 +2,7 @@
 
 A full-stack web application that transforms complex AWS IAM policies into intuitive visual representations, making it easier to understand permissions, relationships, and security configurations.
 
-![Project Status](https://img.shields.io/badge/Status-Week%203%20Complete-success)
+![Project Status](https://img.shields.io/badge/Status-Week%204%20Complete-success)
 ![Backend](https://img.shields.io/badge/Backend-Spring%20Boot-green)
 ![Frontend](https://img.shields.io/badge/Frontend-React-blue)
 ![Database](https://img.shields.io/badge/Database-PostgreSQL-blue)
@@ -18,9 +18,27 @@ The idea is simple: upload an IAM policy, and get back a clear breakdown of who 
 - 🔧 **Policy Upload**: Drag & drop or file picker for JSON policy files
 - 📊 **Policy Analysis**: Parse and analyze complex IAM policy structures
 - 🎨 **AWS Console UI**: Professional interface matching AWS design language
-- ⚡ **Real-time Processing**: Instant policy analysis and feedback
+- ⚡ **Real-time Processing**: Instant policy analysis with beautiful loading animations
 - 🔍 **Detailed Breakdown**: View actions, resources, principals, and conditions
 - 🧪 **Sample Policies**: Built-in examples for testing and learning
+- 📊 **Interactive Donut Chart**: Visual breakdown of Allow vs Deny statements
+- 🌳 **Policy Tree Diagram**: Expandable hierarchical view of policy structure
+- 🕸️ **Network Graph**: Drag-and-drop relationship mapping between principals, actions, and resources
+
+## 🎨 Interactive Visualizations
+
+Your uploaded policies come to life with three different visualization views:
+
+### **📊 Summary Chart**
+A beautiful donut chart showing the breakdown of Allow vs Deny statements with hover effects and smooth animations. Perfect for getting a quick overview of your policy's permission structure.
+
+### **🌳 Tree Diagram** 
+An interactive tree that shows the hierarchical structure of your policy. Click to expand and collapse branches, hover for details. Great for understanding how statements, actions, and resources relate to each other.
+
+### **🕸️ Network Graph**
+The coolest one - a force-directed graph where you can drag nodes around to explore relationships between principals, actions, and resources. Zoom, pan, and filter by node type to dive deep into policy connections.
+
+All powered by D3.js with smooth transitions and AWS-themed styling that matches the rest of the interface.
 
 ## 🛠 Technology Stack
 
@@ -37,6 +55,7 @@ The idea is simple: upload an IAM policy, and get back a clear breakdown of who 
 - **React 18** - Modern frontend framework
 - **Vite** - Fast build tool and dev server
 - **Axios** - HTTP client for API communication
+- **D3.js** - Interactive data visualizations
 - **CSS3** - AWS Console-inspired styling
 - **JavaScript ES6+** - Modern JavaScript features
 
@@ -54,7 +73,7 @@ The idea is simple: upload an IAM policy, and get back a clear breakdown of who 
 │                 │     │                 │     │                 │
 │ • PolicyUploader│     │ • PolicyService │     │ • User/Role     │
 │ • PolicyResults │     │ • PolicyController│     │ • Future: Policy│
-│ • AWS UI Theme  │     │ • JSON Parsing  │     │   Storage       │
+│ • D3.js Charts  │     │ • JSON Parsing  │     │   Storage       │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
      localhost:5173          localhost:8080           localhost:5432
 ```
@@ -67,6 +86,14 @@ Here's what happens when you upload a policy:
 4. Jackson parses the JSON and the service analyzes everything
 5. The backend extracts all the unique actions, resources, and principals
 6. You get back a clean summary displayed in an AWS-styled interface
+7. D3.js transforms the data into interactive visualizations
+
+## 🌐 Live Demo
+
+**Frontend:** `http://18.222.166.31:3000`  
+**Backend API:** `http://18.222.166.31:8080`
+
+Try it out! Upload your own IAM policies or use the sample policy loader to see the visualizations in action.
 
 ## 🚀 Getting Started
 
@@ -130,7 +157,7 @@ Here's what happens when you upload a policy:
 
 1. **Upload a sample policy** - Click "Load Sample Policy" button
 2. **Or upload your own** - Drag & drop a JSON file with IAM policy
-3. **View results** - See policy analysis and breakdown
+3. **View results** - See policy analysis and interactive visualizations
 
 ## 📚 API Documentation
 
@@ -227,7 +254,13 @@ iam-policy-visualizer/
     │       ├── PolicyUploader.jsx    # Upload Component
     │       ├── PolicyUploader.css    # Upload Styles
     │       ├── PolicyResults.jsx     # Results Display
-    │       └── PolicyResults.css     # Results Styles
+    │       ├── PolicyResults.css     # Results Styles
+    │       ├── PolicySummaryChart.jsx # D3.js Donut Chart
+    │       ├── PolicySummaryChart.css # Chart Styles
+    │       ├── PolicyTreeDiagram.jsx  # D3.js Tree Visualization
+    │       ├── PolicyTreeDiagram.css  # Tree Styles
+    │       ├── PolicyNetworkGraph.jsx # D3.js Network Graph
+    │       └── PolicyNetworkGraph.css # Network Styles
     ├── package.json            # Dependencies
     └── vite.config.js          # Build Configuration
 ```
@@ -243,6 +276,11 @@ Added the policy upload endpoint and JSON parsing logic. This was the tricky par
 ### Week 3: Making It Look Good
 Built the React frontend with an AWS Console-inspired design. Added file upload functionality, connected everything to the backend, and made it responsive. Also spent way too much time getting the layout centered properly.
 
+### Week 4: The Visual Magic ✨
+This is where things got really fun. Added three interactive D3.js visualizations that transform boring JSON into engaging, explorable charts. Built donut charts with hover effects, expandable tree diagrams, and a full network graph with drag-and-drop nodes. Also added smooth loading animations and page transitions that make the whole app feel premium.
+
+### Week 5: Deployment & Polish 🚀
+Deployed the full application to AWS EC2 with proper production configuration. Added enhanced loading states, smooth transitions, and final UX polish. Now it's running live in the cloud!
 
 ## 🔧 Configuration
 
@@ -260,24 +298,14 @@ The React app is configured to talk to the backend on port 8080. If you need to 
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+**"No response from backend"**: Your Spring Boot app probably isn't running. Check that you can hit `http://localhost:8080/policy/test` in your browser (or the EC2 URL if deployed).
 
-1. **CORS Errors**
-   - Ensure `CorsConfig.java` is properly configured
-   - Check that backend is running on port 8080
+**CORS errors**: Make sure the `CorsConfig.java` file is in place and your backend restarted after adding it.
 
-2. **Database Connection Issues**
-   - Verify PostgreSQL container is running: `docker ps`
-   - Restart container: `docker start iam-postgres`
+**Database connection issues**: Check if your PostgreSQL container is still running with `docker ps`. If not, start it again with `docker start iam-postgres`.
 
-3. **Frontend Build Issues**
-   - Clear node_modules: `rm -rf node_modules && npm install`
-   - Check Node.js version: `node --version`
+**Frontend won't start**: Try deleting `node_modules` and running `npm install` again. Also check that you have Node.js 18 or higher.
 
-4. **Port Conflicts**
-   - Backend should run on 8080
-   - Frontend should run on 5173
-   - Database should run on 5432
-
+**Visualizations not loading**: Make sure D3.js installed correctly with `npm install d3`. The charts need policy data to render, so upload a policy first.
 
 **Built with ❤️ for better AWS IAM policy understanding**

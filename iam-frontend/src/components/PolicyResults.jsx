@@ -1,5 +1,8 @@
 import React from 'react';
 import './PolicyResults.css';
+import PolicySummaryChart from './PolicySummaryChart';
+import PolicyTreeDiagram from './PolicyTreeDiagram';
+import PolicyNetworkGraph from './PolicyNetworkGraph';
 
 /**
 displays the analyzed policy data returned from the Spring Boot backend.
@@ -10,7 +13,7 @@ Shows:
 */
 function PolicyResults({ policyData, onReset }) {
   
-  //summary stats cards
+  // summary statistics cards
   const renderSummaryCards = () => {
     return (
       <div className="summary-cards">
@@ -37,7 +40,8 @@ function PolicyResults({ policyData, onReset }) {
     );
   };
 
-  // all unique actions
+  //unique actions
+  
   const renderUniqueActions = () => {
     if (!policyData.uniqueActions || policyData.uniqueActions.length === 0) {
       return <p className="no-data">No actions found</p>;
@@ -52,7 +56,8 @@ function PolicyResults({ policyData, onReset }) {
     );
   };
 
-  //list of any unique resouirce
+  // unique resources
+  
   const renderUniqueResources = () => {
     if (!policyData.uniqueResources || policyData.uniqueResources.length === 0) {
       return <p className="no-data">No resources found</p>;
@@ -67,7 +72,8 @@ function PolicyResults({ policyData, onReset }) {
     );
   };
 
-  //statement details
+  // individual statement details
+  
   const renderStatements = () => {
     if (!policyData.statements || policyData.statements.length === 0) {
       return <p className="no-data">No statements found</p>;
@@ -140,7 +146,8 @@ function PolicyResults({ policyData, onReset }) {
     );
   };
 
-  //debug info
+  // debug information 
+  
   const renderDebugInfo = () => {
     return (
       <details className="debug-section">
@@ -153,7 +160,7 @@ function PolicyResults({ policyData, onReset }) {
   };
 
   return (
-    <div className="policy-results">
+    <div className="policy-results results-container results-enter-active">
       
       {/* Header with reset button */}
       <div className="results-header">
@@ -194,19 +201,15 @@ function PolicyResults({ policyData, onReset }) {
         {renderStatements()}
       </div>
 
-      {/* Visualization placeholder for Week 4 */}
+      {/* Interactive Visualizations */}
       <div className="section">
-        <h3>Visualizations</h3>
-        <div className="visualization-placeholder">
-          <div className="placeholder-content">
-            <h4>📊 Coming in Week 4!</h4>
-            <p>Interactive D3.js visualizations will appear here:</p>
-            <ul>
-              <li>Tree diagram showing permission hierarchy</li>
-              <li>Network graph of relationships</li>
-              <li>Interactive charts and filters</li>
-            </ul>
-          </div>
+        <h3>📊 Interactive Visualizations</h3>
+        <div className="visualization-grid">
+          <PolicySummaryChart policyData={policyData} />
+          <PolicyTreeDiagram policyData={policyData} />
+        </div>
+        <div className="visualization-full-width">
+          <PolicyNetworkGraph policyData={policyData} />
         </div>
       </div>
 
