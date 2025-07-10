@@ -14,17 +14,20 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         
-        //allows server and local dev
+        // Production EC2 frontend URL
         config.addAllowedOrigin("http://18.222.166.31:3000");
-        config.addAllowedOrigin("http://localhost:5173");
         
-        //allow all http methods
+        // Local development URLs
+        config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("http://localhost:3000");
+        
+        // Allow all HTTP methods
         config.addAllowedMethod("*");
         
-        //allows all headers
+        // Allow all headers
         config.addAllowedHeader("*");
         
-        //allows if creds needed
+        // Allow credentials if needed
         config.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
