@@ -1,4 +1,3 @@
-// File: src/main/java/com/iam/iambackend/config/CorsConfig.java
 package com.iam.iambackend.config;
 
 import org.springframework.context.annotation.Bean;
