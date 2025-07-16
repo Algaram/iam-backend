@@ -5,6 +5,41 @@
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+.policy-tree-diagram.fullscreen-active {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  background: #f9f9f9;
+  padding: 2rem;
+  overflow: hidden;
+  animation: expandToFullscreen 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.policy-tree-diagram.fullscreen-active .chart-container {
+  min-height: calc(100vh - 200px);
+  height: calc(100vh - 200px);
+}
+
+@keyframes expandToFullscreen {
+  from {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .chart-header {
@@ -32,17 +67,198 @@
   min-height: 500px;
   overflow-x: auto;
   overflow-y: hidden;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  background: #fafbfc;
+  position: relative;
 }
 
 .chart-container svg {
   max-width: 100%;
   height: auto;
+  cursor: grab;
 }
 
-/* D3.js Tree Styles */
+.chart-container svg:active {
+  cursor: grabbing;
+}
+
+
+.tree-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 5px;
+  z-index: 1000;
+}
+
+.tree-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d5dbdb;
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tree-btn:hover {
+  background: rgba(0, 115, 187, 0.9);
+  color: white;
+  border-color: #0073bb;
+  transform: scale(1.05);
+}
+
+.tree-btn:active {
+  transform: scale(0.95);
+}
+
+
+.zoom-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1000;
+}
+
+.zoom-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d5dbdb;
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  color: #232f3e;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.zoom-btn:hover {
+  background: rgba(255, 153, 0, 0.9);
+  color: white;
+  border-color: #ff9900;
+  transform: scale(1.05);
+}
+
+.zoom-btn:active {
+  transform: scale(0.95);
+}
+
+
+.fullscreen-controls {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.fullscreen-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d5dbdb;
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  color: #232f3e;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.fullscreen-btn:hover {
+  background: rgba(35, 47, 62, 0.9);
+  color: white;
+  border-color: #232f3e;
+  transform: scale(1.05);
+}
+
+
+.fullscreen-exit {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+}
+
+.exit-btn {
+  background: rgba(209, 50, 18, 0.9);
+  border: 1px solid #d13212;
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.exit-btn:hover {
+  background: rgba(209, 50, 18, 1);
+  transform: scale(1.05);
+}
+
+
+.zoom-info {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #545b64;
+  border: 1px solid #d5dbdb;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+
+.keyboard-shortcuts {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #545b64;
+  border: 1px solid #d5dbdb;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.keyboard-shortcuts strong {
+  color: #232f3e;
+}
+
+
 .node {
   cursor: pointer;
   transition: all 0.2s ease;
+  outline: none;
 }
 
 .node circle {
@@ -52,6 +268,11 @@
 .node:hover circle {
   filter: brightness(1.2);
   stroke-width: 3px !important;
+}
+
+.node:focus circle {
+  stroke: #ff9900;
+  stroke-width: 3px;
 }
 
 .node text {
@@ -136,34 +357,52 @@
   transform: scale(1);
 }
 
-.zoom-controls {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+.tree-loading {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.zoom-btn {
-  background: white;
-  border: 1px solid #d5dbdb;
-  border-radius: 4px;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-weight: 600;
-  color: #232f3e;
-  transition: all 0.2s ease;
+  align-items: center;
+  height: 400px;
+  color: #545b64;
 }
 
-.zoom-btn:hover {
-  background: #f8f9fa;
-  border-color: #879196;
+.loading-tree {
+  text-align: center;
 }
+
+.loading-tree .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #ff9900;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+.chart-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.chart-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.chart-container::-webkit-scrollbar-thumb {
+  background: #d5dbdb;
+  border-radius: 4px;
+}
+
+.chart-container::-webkit-scrollbar-thumb:hover {
+  background: #879196;
+}
+
 
 @media (max-width: 768px) {
   .policy-tree-diagram {
@@ -193,6 +432,39 @@
   .node text {
     font-size: 10px;
   }
+
+  .tree-controls {
+    flex-direction: row;
+    gap: 3px;
+  }
+
+  .zoom-controls {
+    flex-direction: row;
+    top: auto;
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .tree-btn, .zoom-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .fullscreen-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .keyboard-shortcuts {
+    display: none;
+  }
+
+  .zoom-info {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -204,56 +476,33 @@
     flex-direction: column;
     align-items: center;
   }
+
+  .tree-controls {
+    gap: 2px;
+  }
+
+  .zoom-controls {
+    gap: 2px;
+  }
+
+  .tree-btn, .zoom-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .fullscreen-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .fullscreen-controls {
+    left: 60px;
+    transform: none;
+  }
 }
 
-.chart-container::-webkit-scrollbar {
-  height: 8px;
-}
-
-.chart-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.chart-container::-webkit-scrollbar-thumb {
-  background: #d5dbdb;
-  border-radius: 4px;
-}
-
-.chart-container::-webkit-scrollbar-thumb:hover {
-  background: #879196;
-}
-
-.tree-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-  color: #545b64;
-}
-
-.loading-tree {
-  text-align: center;
-}
-
-.loading-tree .spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #ff9900;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-.node {
-  outline: none;
-}
-
-.node:focus circle {
-  stroke: #ff9900;
-  stroke-width: 3px;
-}
 
 @media (prefers-contrast: high) {
   .node circle {
@@ -262,5 +511,37 @@
   
   .link {
     stroke-width: 2px;
+  }
+
+  .tree-btn, .zoom-btn, .fullscreen-btn {
+    border-width: 2px;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .node,
+  .link,
+  .node circle,
+  .node text,
+  .tree-btn,
+  .zoom-btn,
+  .fullscreen-btn {
+    transition: none;
+  }
+
+  .policy-tree-diagram {
+    transition: none;
+  }
+
+  @keyframes expandToFullscreen {
+    from, to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .tree-enter {
+    transition: none;
   }
 }

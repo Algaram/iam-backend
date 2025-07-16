@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import './PolicyTreeDiagram.css';
 
@@ -8,40 +8,52 @@ D3.js tree diagram
 function PolicyTreeDiagram({ policyData }) {
   const svgRef = useRef();
   const containerRef = useRef();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   useEffect(() => {
     if (!policyData || !policyData.statements) return;
 
-    //clear previous diagram
+    // clear previous diagram
     d3.select(svgRef.current).selectAll("*").remove();
 
-    //create hierarchical data structure
+    
     const hierarchyData = createHierarchyData(policyData);
     
     if (!hierarchyData) return;
 
-    //set up dimensions
+    
     const containerWidth = containerRef.current.offsetWidth;
+    const containerHeight = isFullscreen ? window.innerHeight - 100 : 500;
     const width = Math.max(containerWidth, 600);
-    const height = 500;
+    const height = containerHeight;
     const margin = { top: 20, right: 90, bottom: 30, left: 90 };
 
-    //create SVG with zoom behavior
+    
     const svg = d3.select(svgRef.current)
       .attr("width", width)
       .attr("height", height);
 
+    
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 5])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+        setZoomLevel(event.transform.k);
+      });
+
+    svg.call(zoom);
+
     const g = svg.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // create tree layut
+    
+    svg.zoomBehavior = zoom;
+
+    // create tree 
     const tree = d3.tree()
       .size([height - margin.top - margin.bottom, width - margin.left - margin.right]);
-
-    // create root hierarchy
     const root = d3.hierarchy(hierarchyData);
-    
-    // collapse nodes initially (except the root and th first level)
     root.descendants().forEach((d, i) => {
       if (d.depth >= 2) {
         d._children = d.children;
@@ -49,14 +61,14 @@ function PolicyTreeDiagram({ policyData }) {
       }
     });
 
-    // update function for dynamic tree updates
+    
     function update(source) {
-      //compute new tree layout
+      
       const treeData = tree(root);
       const nodes = treeData.descendants();
       const links = treeData.descendants().slice(1);
 
-      // fixed depth
+      
       nodes.forEach(d => { d.y = d.depth * 150; });
 
       
@@ -69,7 +81,7 @@ function PolicyTreeDiagram({ policyData }) {
         .attr('transform', d => `translate(${source.y0 || 0},${source.x0 || 0})`)
         .on('click', click);
 
-      
+    
       nodeEnter.append('circle')
         .attr('r', 1e-6)
         .style('fill', d => getNodeColor(d))
@@ -118,11 +130,11 @@ function PolicyTreeDiagram({ policyData }) {
       nodeExit.select('text')
         .style('fill-opacity', 1e-6);
 
-      //updates links
+      
       const link = g.selectAll('.link')
         .data(links, d => d.id);
 
-      //new links
+      
       const linkEnter = link.enter().insert('path', 'g')
         .attr('class', 'link')
         .attr('d', d => {
@@ -140,7 +152,7 @@ function PolicyTreeDiagram({ policyData }) {
         .duration(750)
         .attr('d', d => diagonal(d, d.parent));
 
-      
+    
       link.exit().transition()
         .duration(750)
         .attr('d', d => {
@@ -156,7 +168,7 @@ function PolicyTreeDiagram({ policyData }) {
       });
     }
 
-    
+  
     function click(event, d) {
       if (d.children) {
         d._children = d.children;
@@ -168,7 +180,6 @@ function PolicyTreeDiagram({ policyData }) {
       update(d);
     }
 
-    
     function diagonal(s, d) {
       return `M ${s.y} ${s.x}
               C ${(s.y + d.y) / 2} ${s.x},
@@ -182,9 +193,157 @@ function PolicyTreeDiagram({ policyData }) {
     root.y0 = 0;
     update(root);
 
-  }, [policyData]);
+    
+    svg.root = root;
+    svg.updateFunction = update;
 
-  // create hierarchical data structure from policy data
+  }, [policyData, isFullscreen]);
+
+  // zoom
+  const handleZoomIn = () => {
+    const svg = d3.select(svgRef.current);
+    svg.transition().duration(300).call(
+      svg.zoomBehavior.scaleBy, 1.5
+    );
+  };
+
+  const handleZoomOut = () => {
+    const svg = d3.select(svgRef.current);
+    svg.transition().duration(300).call(
+      svg.zoomBehavior.scaleBy, 1 / 1.5
+    );
+  };
+
+  const handleZoomReset = () => {
+    const svg = d3.select(svgRef.current);
+    svg.transition().duration(500).call(
+      svg.zoomBehavior.transform,
+      d3.zoomIdentity
+    );
+  };
+
+  const handleFitToScreen = () => {
+    const svg = d3.select(svgRef.current);
+    const bounds = svg.selectAll('.node').nodes().reduce((acc, node) => {
+      const bbox = node.getBBox();
+      const transform = d3.select(node).attr('transform');
+      const translate = transform.match(/translate\(([^)]+)\)/);
+      if (translate) {
+        const [x, y] = translate[1].split(',').map(Number);
+        acc.minX = Math.min(acc.minX, x + bbox.x);
+        acc.maxX = Math.max(acc.maxX, x + bbox.x + bbox.width);
+        acc.minY = Math.min(acc.minY, y + bbox.y);
+        acc.maxY = Math.max(acc.maxY, y + bbox.y + bbox.height);
+      }
+      return acc;
+    }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+
+    const fullWidth = containerRef.current.offsetWidth;
+    const fullHeight = isFullscreen ? window.innerHeight - 100 : 500;
+    const width = bounds.maxX - bounds.minX;
+    const height = bounds.maxY - bounds.minY;
+    const midX = bounds.minX + width / 2;
+    const midY = bounds.minY + height / 2;
+
+    if (width === 0 || height === 0) return;
+
+    const scale = Math.min(fullWidth, fullHeight) / Math.max(width, height) * 0.8;
+    const translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
+
+    svg.transition().duration(750).call(
+      svg.zoomBehavior.transform,
+      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+    );
+  };
+
+  // expand/collapse nodes
+  const expandAll = () => {
+    const svg = d3.select(svgRef.current);
+    const root = svg.root;
+    
+    function expand(d) {
+      if (d._children) {
+        d.children = d._children;
+        d._children = null;
+      }
+      if (d.children) {
+        d.children.forEach(expand);
+      }
+    }
+    
+    expand(root);
+    svg.updateFunction(root);
+  };
+
+  const collapseAll = () => {
+    const svg = d3.select(svgRef.current);
+    const root = svg.root;
+    
+    function collapse(d) {
+      if (d.children) {
+        d._children = d.children;
+        d.children = null;
+      }
+      if (d._children) {
+        d._children.forEach(collapse);
+      }
+    }
+    
+    if (root.children) {
+      root.children.forEach(collapse);
+    }
+    svg.updateFunction(root);
+  };
+
+  // fullscreen
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const exitFullscreen = () => {
+    setIsFullscreen(false);
+  };
+
+  // keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (!isFullscreen) return;
+      
+      switch (event.key) {
+        case 'Escape':
+          exitFullscreen();
+          break;
+        case '+':
+        case '=':
+          handleZoomIn();
+          break;
+        case '-':
+          handleZoomOut();
+          break;
+        case '0':
+          handleZoomReset();
+          break;
+        case 'f':
+        case 'F':
+          handleFitToScreen();
+          break;
+        case 'e':
+        case 'E':
+          expandAll();
+          break;
+        case 'c':
+        case 'C':
+          collapseAll();
+          break;
+      }
+    };
+
+    if (isFullscreen) {
+      document.addEventListener('keydown', handleKeyPress);
+      return () => document.removeEventListener('keydown', handleKeyPress);
+    }
+  }, [isFullscreen]);
+
   const createHierarchyData = (policyData) => {
     const root = {
       name: `IAM Policy (${policyData.totalStatements} statements)`,
@@ -252,7 +411,7 @@ function PolicyTreeDiagram({ policyData }) {
     return root;
   };
 
-  // Get node color based on type and data
+  // get node color based on type and data
   const getNodeColor = (d) => {
     switch (d.data.type) {
       case 'root':
@@ -276,7 +435,7 @@ function PolicyTreeDiagram({ policyData }) {
     }
   };
 
-  //Get node size based on type
+  //based off type create node size
   const getNodeSize = (d) => {
     switch (d.data.type) {
       case 'root':
@@ -291,8 +450,7 @@ function PolicyTreeDiagram({ policyData }) {
     }
   };
 
-  //Create tooltip text for nodes
-   
+  //tooltip creator
   const createTooltipText = (d) => {
     switch (d.data.type) {
       case 'root':
@@ -312,8 +470,6 @@ function PolicyTreeDiagram({ policyData }) {
     }
   };
 
-  //Truncate text to specified length
-   
   const truncateText = (text, maxLength) => {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
@@ -334,14 +490,60 @@ function PolicyTreeDiagram({ policyData }) {
   }
 
   return (
-    <div className="policy-tree-diagram" ref={containerRef}>
+    <div className={`policy-tree-diagram ${isFullscreen ? 'fullscreen-active' : ''}`} ref={containerRef}>
       <div className="chart-header">
         <h4>Policy Structure Tree</h4>
         <p>Click nodes to expand/collapse • Hover for details</p>
       </div>
+      
       <div className="chart-container">
         <svg ref={svgRef}></svg>
+        
+        {/* Tree Controls */}
+        <div className="tree-controls">
+          <button onClick={expandAll} className="tree-btn" title="Expand All (E)">📁</button>
+          <button onClick={collapseAll} className="tree-btn" title="Collapse All (C)">📂</button>
+        </div>
+
+        {/* Zoom Controls */}
+        <div className="zoom-controls">
+          <button onClick={handleZoomIn} className="zoom-btn" title="Zoom In (+)">+</button>
+          <button onClick={handleZoomOut} className="zoom-btn" title="Zoom Out (-)">−</button>
+          <button onClick={handleZoomReset} className="zoom-btn" title="Reset Zoom (0)">⌂</button>
+          <button onClick={handleFitToScreen} className="zoom-btn" title="Fit to Screen (F)">⛶</button>
+        </div>
+
+        {/* Fullscreen Controls */}
+        <div className="fullscreen-controls">
+          <button onClick={toggleFullscreen} className="fullscreen-btn" title="Toggle Fullscreen">
+            {isFullscreen ? '⛶' : '⛶'}
+          </button>
+        </div>
+
+        {/* Zoom Level Indicator */}
+        <div className="zoom-info">
+          Zoom: {Math.round(zoomLevel * 100)}%
+        </div>
+
+        {/* Fullscreen Exit Button */}
+        {isFullscreen && (
+          <div className="fullscreen-exit">
+            <button onClick={exitFullscreen} className="exit-btn">
+              ✕ Exit Fullscreen (ESC)
+            </button>
+          </div>
+        )}
+
+        {/* Keyboard Shortcuts Help */}
+        {isFullscreen && (
+          <div className="keyboard-shortcuts">
+            <small>
+              <strong>Shortcuts:</strong> +/- (zoom) • 0 (reset) • F (fit) • E (expand) • C (collapse) • ESC (exit)
+            </small>
+          </div>
+        )}
       </div>
+      
       <div className="chart-legend">
         <div className="legend-item">
           <div className="legend-color" style={{backgroundColor: '#1d8102'}}></div>

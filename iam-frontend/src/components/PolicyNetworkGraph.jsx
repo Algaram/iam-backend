@@ -9,6 +9,8 @@ function PolicyNetworkGraph({ policyData }) {
   const svgRef = useRef();
   const containerRef = useRef();
   const [selectedNodeType, setSelectedNodeType] = useState('all');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   useEffect(() => {
     if (!policyData || !policyData.statements) return;
@@ -20,23 +22,25 @@ function PolicyNetworkGraph({ policyData }) {
     if (nodes.length === 0) return;
 
     const containerWidth = containerRef.current.offsetWidth;
+    const containerHeight = isFullscreen ? window.innerHeight - 100 : 400;
     const width = Math.max(containerWidth, 500);
-    const height = 400;
+    const height = containerHeight;
 
     const svg = d3.select(svgRef.current)
       .attr("width", width)
       .attr("height", height);
 
-
+    // Enhanced zoom behavior with programmatic control
     const zoom = d3.zoom()
-      .scaleExtent([0.5, 3])
+      .scaleExtent([0.1, 5])
       .on("zoom", (event) => {
         g.attr("transform", event.transform);
+        setZoomLevel(event.transform.k);
       });
 
     svg.call(zoom);
-
     const g = svg.append("g");
+    svg.zoomBehavior = zoom;
 
     // force simulation
     const simulation = d3.forceSimulation(nodes)
@@ -45,12 +49,10 @@ function PolicyNetworkGraph({ policyData }) {
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(20));
 
-
     const colorScale = d3.scaleOrdinal()
       .domain(['statement', 'action', 'resource', 'principal'])
       .range(['#232f3e', '#0073bb', '#1d8102', '#b7791f']);
 
-   
     const link = g.append("g")
       .attr("class", "links")
       .selectAll("line")
@@ -61,7 +63,6 @@ function PolicyNetworkGraph({ policyData }) {
       .style("stroke-opacity", 0.8)
       .style("stroke-width", d => Math.sqrt(d.value || 1) + 1);
 
-    
     const node = g.append("g")
       .attr("class", "nodes")
       .selectAll("g")
@@ -73,7 +74,6 @@ function PolicyNetworkGraph({ policyData }) {
         .on("drag", dragged)
         .on("end", dragended));
 
-    
     node.append("circle")
       .attr("r", d => getNodeRadius(d))
       .attr("fill", d => colorScale(d.type))
@@ -81,7 +81,6 @@ function PolicyNetworkGraph({ policyData }) {
       .attr("stroke-width", 2)
       .style("cursor", "pointer");
 
-    
     node.append("text")
       .text(d => truncateText(d.label, 15))
       .attr("x", 0)
@@ -91,16 +90,12 @@ function PolicyNetworkGraph({ policyData }) {
       .style("fill", "#232f3e")
       .style("pointer-events", "none");
 
-    
     node.append("title")
       .text(d => createTooltipText(d));
 
-    //hover effects
+    // hover effects
     node.on("mouseover", function(event, d) {
-      // higlhight connected nodes and links
       highlightConnections(d, node, link, true);
-      
-      // enlarge hovered node
       d3.select(this).select("circle")
         .transition()
         .duration(200)
@@ -108,10 +103,7 @@ function PolicyNetworkGraph({ policyData }) {
         .attr("stroke-width", 3);
     })
     .on("mouseout", function(event, d) {
-      // remove highlights
       highlightConnections(d, node, link, false);
-      
-      //return node to normal size
       d3.select(this).select("circle")
         .transition()
         .duration(200)
@@ -119,7 +111,7 @@ function PolicyNetworkGraph({ policyData }) {
         .attr("stroke-width", 2);
     });
 
-    //update positions on simulation tick
+    
     simulation.on("tick", () => {
       link
         .attr("x1", d => d.source.x)
@@ -131,7 +123,7 @@ function PolicyNetworkGraph({ policyData }) {
         .attr("transform", d => `translate(${d.x},${d.y})`);
     });
 
-    //drag functions
+    
     function dragstarted(event, d) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
@@ -149,7 +141,7 @@ function PolicyNetworkGraph({ policyData }) {
       d.fy = null;
     }
 
-    //filter nodes based on selected type
+    
     if (selectedNodeType !== 'all') {
       node.style("opacity", d => d.type === selectedNodeType ? 1 : 0.2);
       link.style("opacity", d => 
@@ -160,16 +152,102 @@ function PolicyNetworkGraph({ policyData }) {
       link.style("opacity", 0.8);
     }
 
-  }, [policyData, selectedNodeType]);
+    
+    svg.simulation = simulation;
+    svg.nodeSelection = node;
+    svg.linkSelection = link;
 
-  //Create network data from policy data
-   
+  }, [policyData, selectedNodeType, isFullscreen]);
+
+  // zoom items
+  const handleZoomIn = () => {
+    const svg = d3.select(svgRef.current);
+    svg.transition().duration(300).call(
+      svg.zoomBehavior.scaleBy, 1.5
+    );
+  };
+
+  const handleZoomOut = () => {
+    const svg = d3.select(svgRef.current);
+    svg.transition().duration(300).call(
+      svg.zoomBehavior.scaleBy, 1 / 1.5
+    );
+  };
+
+  const handleZoomReset = () => {
+    const svg = d3.select(svgRef.current);
+    svg.transition().duration(500).call(
+      svg.zoomBehavior.transform,
+      d3.zoomIdentity
+    );
+  };
+
+  const handleFitToScreen = () => {
+    const svg = d3.select(svgRef.current);
+    const bounds = svg.select('.nodes').node().getBBox();
+    const fullWidth = containerRef.current.offsetWidth;
+    const fullHeight = isFullscreen ? window.innerHeight - 100 : 400;
+    const width = bounds.width;
+    const height = bounds.height;
+    const midX = bounds.x + width / 2;
+    const midY = bounds.y + height / 2;
+    if (width == 0 || height == 0) return;
+    const scale = Math.min(fullWidth, fullHeight) / Math.max(width, height) * 0.9;
+    const translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
+
+    svg.transition().duration(750).call(
+      svg.zoomBehavior.transform,
+      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+    );
+  };
+
+  // fullscreen
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const exitFullscreen = () => {
+    setIsFullscreen(false);
+  };
+
+  // keyboard butts
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (!isFullscreen) return;
+      
+      switch (event.key) {
+        case 'Escape':
+          exitFullscreen();
+          break;
+        case '+':
+        case '=':
+          handleZoomIn();
+          break;
+        case '-':
+          handleZoomOut();
+          break;
+        case '0':
+          handleZoomReset();
+          break;
+        case 'f':
+        case 'F':
+          handleFitToScreen();
+          break;
+      }
+    };
+
+    if (isFullscreen) {
+      document.addEventListener('keydown', handleKeyPress);
+      return () => document.removeEventListener('keydown', handleKeyPress);
+    }
+  }, [isFullscreen]);
+
+  // Create network data from policy data
   const createNetworkData = (policyData) => {
     const nodes = [];
     const links = [];
     const nodeMap = new Map();
 
-    // helper to add node if it doesn't exist
     const addNode = (id, label, type, data = {}) => {
       if (!nodeMap.has(id)) {
         const node = { id, label, type, ...data };
@@ -179,7 +257,6 @@ function PolicyNetworkGraph({ policyData }) {
       return nodeMap.get(id);
     };
 
-    //process each statement
     policyData.statements.forEach((statement, stmtIndex) => {
       const statementId = `stmt-${stmtIndex}`;
       const statementNode = addNode(
@@ -189,7 +266,6 @@ function PolicyNetworkGraph({ policyData }) {
         { effect: statement.effect, sid: statement.sid }
       );
 
-      // add action nodes and links
       if (statement.actions) {
         statement.actions.forEach(action => {
           const actionId = `action-${action}`;
@@ -203,7 +279,6 @@ function PolicyNetworkGraph({ policyData }) {
         });
       }
 
-      // add resource nodes and links
       if (statement.resources) {
         statement.resources.forEach(resource => {
           const resourceId = `resource-${resource}`;
@@ -217,7 +292,6 @@ function PolicyNetworkGraph({ policyData }) {
         });
       }
 
-      // add principal node and link if exists
       if (statement.principalSummary) {
         const principalId = `principal-${statement.principalSummary}`;
         const principalNode = addNode(principalId, statement.principalSummary, 'principal');
@@ -233,25 +307,16 @@ function PolicyNetworkGraph({ policyData }) {
     return { nodes, links };
   };
 
-  //get node radius based on type and connections
-   
   const getNodeRadius = (d) => {
     switch (d.type) {
-      case 'statement':
-        return 12;
-      case 'action':
-        return 8;
-      case 'resource':
-        return 10;
-      case 'principal':
-        return 9;
-      default:
-        return 6;
+      case 'statement': return 12;
+      case 'action': return 8;
+      case 'resource': return 10;
+      case 'principal': return 9;
+      default: return 6;
     }
   };
 
-  //create tooltip text for nodes
-   
   const createTooltipText = (d) => {
     switch (d.type) {
       case 'statement':
@@ -267,12 +332,9 @@ function PolicyNetworkGraph({ policyData }) {
     }
   };
 
-  //highlight all connected nodes and links
-   
   const highlightConnections = (d, nodeSelection, linkSelection, highlight) => {
     const connectedNodes = new Set();
     
-    //connected nodes
     linkSelection.each(function(link) {
       if (link.source.id === d.id || link.target.id === d.id) {
         connectedNodes.add(link.source.id);
@@ -280,13 +342,11 @@ function PolicyNetworkGraph({ policyData }) {
       }
     });
 
-    // change node highlight
     nodeSelection.style("opacity", node => {
       if (!highlight) return 1;
       return connectedNodes.has(node.id) ? 1 : 0.2;
     });
 
-    //chaneg link highlight
     linkSelection.style("stroke-opacity", link => {
       if (!highlight) return 0.8;
       return (link.source.id === d.id || link.target.id === d.id) ? 1 : 0.1;
@@ -297,8 +357,6 @@ function PolicyNetworkGraph({ policyData }) {
     });
   };
 
-  //Truncate text to specified length
-   
   const truncateText = (text, maxLength) => {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
@@ -319,7 +377,7 @@ function PolicyNetworkGraph({ policyData }) {
   }
 
   return (
-    <div className="policy-network-graph" ref={containerRef}>
+    <div className={`policy-network-graph ${isFullscreen ? 'fullscreen-active' : ''}`} ref={containerRef}>
       <div className="chart-header">
         <h4>Policy Relationship Network</h4>
         <p>Drag nodes • Hover to highlight • Zoom to explore</p>
@@ -343,6 +401,44 @@ function PolicyNetworkGraph({ policyData }) {
 
       <div className="chart-container">
         <svg ref={svgRef}></svg>
+        
+        {/* Zoom Controls */}
+        <div className="zoom-controls">
+          <button onClick={handleZoomIn} className="zoom-btn" title="Zoom In (+)">+</button>
+          <button onClick={handleZoomOut} className="zoom-btn" title="Zoom Out (-)">−</button>
+          <button onClick={handleZoomReset} className="zoom-btn" title="Reset Zoom (0)">⌂</button>
+          <button onClick={handleFitToScreen} className="zoom-btn" title="Fit to Screen (F)">⛶</button>
+        </div>
+
+        {/* Fullscreen Controls */}
+        <div className="fullscreen-controls">
+          <button onClick={toggleFullscreen} className="fullscreen-btn" title="Toggle Fullscreen">
+            {isFullscreen ? '⛶' : '⛶'}
+          </button>
+        </div>
+
+        {/* Zoom Level Indicator */}
+        <div className="zoom-info">
+          Zoom: {Math.round(zoomLevel * 100)}%
+        </div>
+
+        {/* Fullscreen Exit Button */}
+        {isFullscreen && (
+          <div className="fullscreen-exit">
+            <button onClick={exitFullscreen} className="exit-btn">
+              ✕ Exit Fullscreen (ESC)
+            </button>
+          </div>
+        )}
+
+        {/* Keyboard Shortcuts Help */}
+        {isFullscreen && (
+          <div className="keyboard-shortcuts">
+            <small>
+              <strong>Shortcuts:</strong> +/- (zoom) • 0 (reset) • F (fit) • ESC (exit)
+            </small>
+          </div>
+        )}
       </div>
 
       {/* Legend */}
